@@ -1,0 +1,28 @@
+services:
+  web:
+    build: .
+    image: devpro-celery:dev
+    depends_on:
+      - rabbitmq
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: devpro
+      RABBITMQ_DEFAULT_PASS: devpro
+
+  celery:
+    image: devpro-celery:dev
+    command: watchfiles --filter python 'celery -A devpro.celery worker -l INFO'
+    depends_on:
+      - rabbitmq
+    volumes:
+      - .:/app
+    environment:
+      WATCHFILES_FORCE_POLLING: true
